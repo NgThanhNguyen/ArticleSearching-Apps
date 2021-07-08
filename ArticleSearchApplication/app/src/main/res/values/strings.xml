@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ArticleSearchApplication</string>
+    <string name="error_fetch_articles">Please check your internet connection</string>
+</resources>
