@@ -11,7 +11,7 @@ import com.example.articlesearchapplication.R
 import com.example.articlesearchapplication.model.data.Docs
 import kotlinx.android.synthetic.main.article_item.view.*
 
-class ArticleAdapter(private var Articles: MutableList<Docs>,
+class ArticleAdapter(private var Articles: List<Docs>,
 ): RecyclerView.Adapter<ArticleAdapter.ArticleViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleViewHolder {
@@ -29,15 +29,15 @@ class ArticleAdapter(private var Articles: MutableList<Docs>,
         return this.Articles.size
     }
 
-    fun updatearticles(rp: MutableList<Docs>) {
+    fun updatearticles(rp: List<Docs>) {
         this.Articles = rp
         notifyDataSetChanged()
     }
 
-    fun clear() {
+/*    fun clear() {
         Articles.clear()
         notifyDataSetChanged()
-    }
+    }*/
 
     inner class ArticleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -46,7 +46,7 @@ class ArticleAdapter(private var Articles: MutableList<Docs>,
         fun bind(Articles: Docs) {
             itemView.title.text = Articles.headline.title
                 Glide.with(itemView)
-                    .load(Articles.multimedia[0].image)
+                    .load("http://static01.nyt.com/${Articles.multimedia[0].image}")
                     .transform(CenterCrop())
                     .into(poster)
             }
