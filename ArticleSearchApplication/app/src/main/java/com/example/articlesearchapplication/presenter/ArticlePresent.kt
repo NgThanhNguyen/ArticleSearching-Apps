@@ -11,7 +11,7 @@ class ArticlePresent(articleView: ArticleInterface.ArticleView): ArticleInterfac
         model?.getArticleSection(Page)
     }
 
-    private fun onSuccess(list: List<Docs>) {
+    private fun onSuccess(list: MutableList<Docs>) {
         view.onSuccess(list)
     }
 

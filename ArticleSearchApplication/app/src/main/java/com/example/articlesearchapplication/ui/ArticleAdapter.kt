@@ -11,7 +11,7 @@ import com.example.articlesearchapplication.R
 import com.example.articlesearchapplication.model.data.Docs
 import kotlinx.android.synthetic.main.article_item.view.*
 
-class ArticleAdapter(private var Articles: List<Docs>,
+class ArticleAdapter(private var articles: MutableList<Docs>, private val onMovieClick: (Articles: Docs) -> Unit
 ): RecyclerView.Adapter<ArticleAdapter.ArticleViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleViewHolder {
@@ -22,33 +22,42 @@ class ArticleAdapter(private var Articles: List<Docs>,
     }
 
     override fun onBindViewHolder(holder: ArticleViewHolder, position: Int) {
-        holder.bind(Articles[position])
+        holder.bind(articles[position])
     }
 
     override fun getItemCount(): Int {
-        return this.Articles.size
+        return articles.size
     }
 
-    fun updatearticles(rp: List<Docs>) {
-        this.Articles = rp
+    fun appendArticleList(Articles: MutableList<Docs>) {
+        articles.addAll(Articles)
         notifyDataSetChanged()
     }
 
-/*    fun clear() {
-        Articles.clear()
+    fun updatearticles(rp: MutableList<Docs>) {
+        articles = rp
         notifyDataSetChanged()
-    }*/
+    }
+
+    fun clearArticle() {
+        articles.clear()
+        notifyDataSetChanged()
+    }
 
     inner class ArticleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val poster: ImageView = itemView.findViewById(R.id.article_image)
 
-        fun bind(Articles: Docs) {
-            itemView.title.text = Articles.headline.title
+        fun bind(articles: Docs) {
+                itemView.title.text = articles.headline.title
+            if(!articles.multimedia[0].image.isNullOrEmpty()) {
                 Glide.with(itemView)
-                    .load("http://static01.nyt.com/${Articles.multimedia[0].image}")
+                    .load("http://static01.nyt.com/${articles.multimedia[0].image}").error(R.drawable.ic_launcher_background)
                     .transform(CenterCrop())
                     .into(poster)
             }
+            itemView.setOnClickListener { onMovieClick.invoke(articles) }
         }
     }
+
+}

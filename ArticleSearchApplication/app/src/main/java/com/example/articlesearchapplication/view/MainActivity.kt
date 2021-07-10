@@ -2,8 +2,11 @@ package com.example.articlesearchapplication.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.articlesearchapplication.R
@@ -17,7 +20,8 @@ class MainActivity : AppCompatActivity(), ArticleInterface.ArticleView {
     private lateinit var recyclerView: RecyclerView
     private lateinit var layoutManager: GridLayoutManager
     private lateinit var adapter: ArticleAdapter
-    private var ArticlePage: Int = 1
+    private var articlePage: Int = 1
+    private var visibleThreshold = 2
 
     private var presenter: ArticlePresent? = null
 
@@ -27,45 +31,73 @@ class MainActivity : AppCompatActivity(), ArticleInterface.ArticleView {
 
         initAdapter()
 
-        val progressBar: ProgressBar = this.loading
+        val progressBar: ProgressBar = findViewById(R.id.loading)
         progressBar.visibility = View.VISIBLE
 
         presenter = ArticlePresent(this)
-        presenter!!.networkCall(ArticlePage)
+        presenter?.networkCall(articlePage)
 
         progressBar.visibility = View.GONE
+
+        attachPopularMoviesOnScrollListener()
 
     }
 
     fun initAdapter() {
         recyclerView = findViewById(R.id.article_list)
 
-        layoutManager = GridLayoutManager(this, 3, GridLayoutManager.VERTICAL, false)
+        layoutManager = GridLayoutManager(this, 3)
 
         recyclerView.layoutManager = layoutManager
 
-        adapter = ArticleAdapter(mutableListOf())
+        adapter = ArticleAdapter(mutableListOf()) { Articles -> showWeb(Articles) }
 
         recyclerView.adapter = adapter
     }
 
-    override fun onSuccess(list: List<Docs>) {
-        adapter.updatearticles(list)
+    override fun onSuccess(list: MutableList<Docs>) {
+        //adapter.updatearticles(list)
+        articlesFetch(list)
+        //Log.d("MyTag",list.toString())
     }
 
     override fun onFailed(msg: String) {
+        //Log.d("MyTag",msg)
+        onError()
+    }
 
+    private fun attachPopularMoviesOnScrollListener() {
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val totalItemCount = layoutManager.itemCount
+                // The total number of movies in MoviesAdapter
+                //val visibleItemCount = layoutManager.childCount
+                //
+                //val firstVisibleItem = layoutManager.findFirstVisibleItemPosition()
+
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+
+                if (lastVisibleItem  == totalItemCount - 1) {
+                    recyclerView.removeOnScrollListener(this)
+                    articlePage++
+                    presenter?.networkCall(articlePage)
+                }
+            }
+        })
+    }
+
+    private fun onError() {
+        Toast.makeText(this, getString(R.string.error_fetch_articles), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun articlesFetch(list: MutableList<Docs>) {
+        adapter.appendArticleList(list)
+    }
+
+    private fun showWeb(Articles: Docs) {
+        
     }
 
 }
 
-/*    private fun getArticle() {
-        ArticleServices.getArticle(
-            ArticlePage
-        )
-    }*/
 
-/*    private fun ArticlesFetch(rp: MutableList<Docs>) {
-        Adapter.updatearticles(rp)
-    }
- */

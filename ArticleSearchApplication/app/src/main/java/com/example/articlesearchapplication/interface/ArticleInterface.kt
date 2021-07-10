@@ -8,7 +8,7 @@ interface ArticleInterface {
     }
 
     interface ArticleView {
-        fun onSuccess(list: List<Docs>)
+        fun onSuccess(list: MutableList<Docs>)
         fun onFailed(msg: String)
     }
 
