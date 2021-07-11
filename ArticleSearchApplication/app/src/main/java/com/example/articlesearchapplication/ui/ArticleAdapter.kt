@@ -34,7 +34,7 @@ class ArticleAdapter(private var articles: MutableList<Docs>, private val onMovi
         notifyDataSetChanged()
     }
 
-    fun updatearticles(rp: MutableList<Docs>) {
+    fun updateArticles(rp: MutableList<Docs>) {
         articles = rp
         notifyDataSetChanged()
     }
@@ -50,9 +50,9 @@ class ArticleAdapter(private var articles: MutableList<Docs>, private val onMovi
 
         fun bind(articles: Docs) {
                 itemView.title.text = articles.headline.title
-            if(!articles.multimedia[0].image.isNullOrEmpty()) {
+            if(!articles.multimedia.isNullOrEmpty()) {
                 Glide.with(itemView)
-                    .load("http://static01.nyt.com/${articles.multimedia[0].image}").error(R.drawable.ic_launcher_background)
+                    .load("http://static01.nyt.com/${articles.multimedia[0].image}").error(R.drawable.ic_baseline_image_24)
                     .transform(CenterCrop())
                     .into(poster)
             }

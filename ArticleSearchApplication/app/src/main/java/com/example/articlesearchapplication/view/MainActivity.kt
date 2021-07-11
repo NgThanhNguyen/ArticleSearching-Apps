@@ -1,12 +1,14 @@
 package com.example.articlesearchapplication.view
 
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.ImageView
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.articlesearchapplication.R
@@ -16,18 +18,25 @@ import com.example.articlesearchapplication.presenter.ArticlePresent
 import com.example.articlesearchapplication.ui.ArticleAdapter
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity(), ArticleInterface.ArticleView {
+class MainActivity : AppCompatActivity(), ArticleInterface.ArticleView, View.OnClickListener {
     private lateinit var recyclerView: RecyclerView
     private lateinit var layoutManager: GridLayoutManager
     private lateinit var adapter: ArticleAdapter
     private var articlePage: Int = 1
-    private var visibleThreshold = 2
+    private var isLoading: Boolean = true
+
+    private lateinit var empty: String
 
     private var presenter: ArticlePresent? = null
+    private lateinit var searchBar: EditText
+    private lateinit var button: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        searchBar = findViewById(R.id.input)
+        button = findViewById(R.id.button)
 
         initAdapter()
 
@@ -37,13 +46,16 @@ class MainActivity : AppCompatActivity(), ArticleInterface.ArticleView {
         presenter = ArticlePresent(this)
         presenter?.networkCall(articlePage)
 
-        progressBar.visibility = View.GONE
+        //progressBar.visibility = View.GONE
 
-        attachPopularMoviesOnScrollListener()
+        attachOnScrollListener()
+
+        button.setOnClickListener(this)
+
 
     }
 
-    fun initAdapter() {
+    private fun initAdapter() {
         recyclerView = findViewById(R.id.article_list)
 
         layoutManager = GridLayoutManager(this, 3)
@@ -58,29 +70,31 @@ class MainActivity : AppCompatActivity(), ArticleInterface.ArticleView {
     override fun onSuccess(list: MutableList<Docs>) {
         //adapter.updatearticles(list)
         articlesFetch(list)
-        //Log.d("MyTag",list.toString())
+        loading.visibility = View.GONE
+
     }
 
     override fun onFailed(msg: String) {
         //Log.d("MyTag",msg)
-        onError()
+        loading.visibility = View.VISIBLE
     }
 
-    private fun attachPopularMoviesOnScrollListener() {
+    private fun attachOnScrollListener() {
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val totalItemCount = layoutManager.itemCount
-                // The total number of movies in MoviesAdapter
-                //val visibleItemCount = layoutManager.childCount
-                //
-                //val firstVisibleItem = layoutManager.findFirstVisibleItemPosition()
 
                 val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
 
                 if (lastVisibleItem  == totalItemCount - 1) {
-                    recyclerView.removeOnScrollListener(this)
+                    loading.visibility = View.VISIBLE
                     articlePage++
-                    presenter?.networkCall(articlePage)
+                    if(presenter?.a == true) {
+                        presenter?.searchCall(articlePage,empty)
+                    }
+                    else {
+                        presenter?.networkCall(articlePage)
+                    }
                 }
             }
         })
@@ -95,9 +109,29 @@ class MainActivity : AppCompatActivity(), ArticleInterface.ArticleView {
     }
 
     private fun showWeb(Articles: Docs) {
-        
+        val url = Articles.web_url
+        val builder = CustomTabsIntent.Builder()
+        val customTabIntent = builder.build()
+        customTabIntent.launchUrl(this, Uri.parse(url))
     }
 
+    override fun onClick(v: View?) {
+        if(v?.id == R.id.button) {
+            loading.visibility = View.VISIBLE
+            presenter?.a = true
+            adapter.clearArticle()
+            empty = searchBar.text.toString()
+            if(empty.isNullOrEmpty()) {
+                articlePage = 1
+                presenter?.networkCall(articlePage)
+            }
+            else {
+                articlePage = 1
+                presenter?.searchCall(articlePage, empty)
+            }
+
+        }
+    }
 }
 
 

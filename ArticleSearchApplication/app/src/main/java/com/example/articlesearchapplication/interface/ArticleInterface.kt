@@ -5,6 +5,7 @@ import com.example.articlesearchapplication.model.data.Docs
 interface ArticleInterface {
     interface ArticleModel {
         fun getArticleSection(Page: Int)
+        fun getArticleByQuery(Page: Int, Query: String)
     }
 
     interface ArticleView {
@@ -14,5 +15,6 @@ interface ArticleInterface {
 
     interface ArticlePresent {
         fun networkCall(Page: Int)
+        fun searchCall(Page: Int, Query: String)
     }
 }
